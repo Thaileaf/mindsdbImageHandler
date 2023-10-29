@@ -35,6 +35,7 @@ class HuggingFaceHandler(BaseMLEngine):
             "summarization",
             "text2text-generation",
             "fill-mask",
+            "image-to-text"
         ]
 
         if metadata.pipeline_tag not in supported_tasks:
@@ -224,7 +225,6 @@ class HuggingFaceHandler(BaseMLEngine):
 
     def predict_text2text(self, pipeline, item, args):
         result = pipeline([item], max_length=args["max_length"])[0]
-
         final = {}
         final[args["target"]] = result["generated_text"]
 
@@ -240,6 +240,17 @@ class HuggingFaceHandler(BaseMLEngine):
 
         return final
 
+    def predict_image_to_text(self, pipeline, item, args):
+        # take in url here
+        result = pipeline([item])
+
+        final = {}
+        final[args["target"]] = result["generated_text"]
+        return final
+    
+    def predict_audio_summarization(self, pipeline, item, args):
+        pass
+
     def predict(self, df, args=None):
 
         fnc_list = {
@@ -248,6 +259,7 @@ class HuggingFaceHandler(BaseMLEngine):
             "translation": self.predict_translation,
             "summarization": self.predict_summarization,
             "fill-mask": self.predict_fill_mask,
+            "image-to-text": self.predict_image_to_text
         }
 
         ###### get stuff from model folder
@@ -285,7 +297,6 @@ class HuggingFaceHandler(BaseMLEngine):
         if input_column not in df.columns:
             raise RuntimeError(f'Column "{input_column}" not found in input data')
         input_list = df[input_column]
-
         max_tokens = pipeline.tokenizer.model_max_length
 
         results = []
