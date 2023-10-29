@@ -35,7 +35,8 @@ class HuggingFaceHandler(BaseMLEngine):
             "summarization",
             "text2text-generation",
             "fill-mask",
-            "image-to-text"
+            "image-to-text",
+            "audio-to-text",
         ]
 
         if metadata.pipeline_tag not in supported_tasks:
@@ -248,8 +249,12 @@ class HuggingFaceHandler(BaseMLEngine):
         final[args["target"]] = result["generated_text"]
         return final
     
-    def predict_audio_summarization(self, pipeline, item, args):
-        pass
+    def predict_audio_text(self, pipeline, item, args):
+        result = pipeline([item])
+
+        final = {}
+        final[args["target"]] = result["text"]
+        return final
 
     def predict(self, df, args=None):
 
@@ -259,7 +264,8 @@ class HuggingFaceHandler(BaseMLEngine):
             "translation": self.predict_translation,
             "summarization": self.predict_summarization,
             "fill-mask": self.predict_fill_mask,
-            "image-to-text": self.predict_image_to_text
+            "image-to-text": self.predict_image_to_text,
+            "audio-to-text": self.predict_audio_text
         }
 
         ###### get stuff from model folder
